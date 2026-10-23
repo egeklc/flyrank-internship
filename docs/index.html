@@ -1,1 +1,325 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Capstone report on ranking SEO content pages by likelihood of declining performance using a Random Forest model and a rule-based baseline.">
+  <title>Capstone Report — Refresh / Content Opportunity</title>
+  <style>:root {
+  color-scheme: dark;
+  --text: #e8edf4;
+  --muted: #b5bfcc;
+  --border: #3b4655;
+  --surface: #222c39;
+  --link: #8ab4f8;
+  --accent: #8ab4f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #151b24;
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+main {
+  width: min(100% - 36px, 900px);
+  margin: 0 auto;
+  padding: 48px 0 72px;
+}
+
+h1, h2, h3 {
+  line-height: 1.25;
+  color: #f3f6fb;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  letter-spacing: -0.035em;
+  margin: 0 0 24px;
+}
+
+h2 {
+  margin: 48px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.65rem;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  margin: 28px 0 10px;
+  font-size: 1.2rem;
+}
+
+p {
+  margin: 0 0 16px;
+}
+
+a {
+  color: var(--link);
+  overflow-wrap: anywhere;
+}
+
+a:hover {
+  color: #c3dcff;
+  text-decoration-thickness: 2px;
+}
+
+.metadata {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 18px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.metadata li {
+  margin: 3px 0;
+}
+
+.metadata strong {
+  display: inline-block;
+  min-width: 72px;
+  color: #f3f6fb;
+}
+
+ul {
+  padding-left: 24px;
+  margin: 0 0 18px;
+}
+
+li {
+  margin: 5px 0;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.91em;
+  color: #d5e4ff;
+  background: #303b49;
+  border: 1px solid #3b4655;
+  border-radius: 4px;
+  padding: 2px 5px;
+  overflow-wrap: anywhere;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 18px 0 24px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+th, td {
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #283444;
+  color: #f3f6fb;
+  font-weight: 650;
+}
+
+tbody tr {
+  background: #19212c;
+}
+
+tbody tr:nth-child(even) {
+  background: #202a37;
+}
+
+tbody tr:hover {
+  background: #2a3748;
+}
+
+.note {
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  margin: 18px 0;
+  background: var(--surface);
+}
+
+figure {
+  margin: 22px 0 28px;
+}
+
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #202a37;
+}
+
+figcaption {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-top: 9px;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+  padding-top: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  main {
+    width: min(100% - 24px, 900px);
+    padding-top: 28px;
+  }
+
+  h2 {
+    margin-top: 36px;
+  }
+
+  th, td {
+    padding: 9px;
+  }
+}
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <header>
+        <h1>Capstone Report — Refresh / Content Opportunity</h1>
+        <ul class="metadata">
+          <li><strong>Author:</strong> Ege Kılıç</li>
+          <li><strong>Lane:</strong> Lane 2 Refresh / Content Opportunity Scoring</li>
+          <li><strong>Repo:</strong> <a href="https://github.com/egeklc/flyrank-internship" target="_blank" rel="noopener noreferrer">https://github.com/egeklc/flyrank-internship</a></li>
+          <li><strong>Date:</strong> 23.10.2026</li>
+        </ul>
+      </header>
+
+      <section id="abstract">
+        <h2>0. Abstract</h2>
+        <p>This project investigates whether a machine-learning model can rank content pages by their likelihood of declining performance to help SEO teams prioritize pages for review. The analysis uses an anonymized dataset containing 30,000 content pages across 32 pseudonymized clients, with one observation per page. A Random Forest model is compared with a transparent rule-based baseline using a client-grouped holdout split to evaluate performance on unseen clients. The Random Forest achieved a Precision@50 of 0.680 and ROC-AUC of 0.600, compared with 0.500 and 0.504 for the baseline; 34 of its 50 highest-ranked pages were labeled as declining, compared with 25 for the baseline. The output is a ranked review queue with reason codes and suggested actions to support human decision-making, not an automated decision to refresh a page.</p>
+      </section>
+
+      <section id="problem-framing">
+        <h2>1. Problem framing</h2>
+        <p>SEO teams manage many content pages, and reviewing every page with the same level of attention is inefficient. This project explores whether machine learning can help prioritize which pages an editor should investigate first. The unit of analysis is an individual content page, and the output is a ranked queue containing a model score, a reason code, and a suggested action. A FlyRank editor can use this information to investigate a page's performance and context before deciding whether to refresh, expand, protect, monitor, or take another action. A wrong recommendation could waste editorial time on a page that does not need intervention, while a genuinely underperforming page ranked too low might receive attention later. The model's score is therefore a prioritization signal, not proof that a page is declining or that refreshing it will improve performance. Machine learning provides a way to combine multiple signals and rank pages consistently, while the rule-based baseline offers a simpler reference point for evaluating whether the model adds value.</p>
+      </section>
+
+      <section id="data-safety">
+        <h2>2. Data safety</h2>
+        <p>The project uses the FlyRank ML starter dataset, containing 30,000 rows across 32 pseudonymized clients. Each row represents a single content page with performance, content, search, and freshness features. No client-identifying information appears anywhere in the <code>work/</code> directory. The pseudonymous <code>client_id</code> is used only to group data during training and evaluation and is excluded from the model features. The <code>content_id</code> is also excluded because it serves as an identifier rather than a predictive feature. To reduce target leakage, <code>trend_direction</code>, <code>trend_pct</code>, and <code>is_declining</code> are excluded from the model's input features. Recent 30-day performance columns are also excluded from the current feature set.</p>
+      </section>
+
+      <section id="baseline">
+        <h2>3. Baseline</h2>
+        <p>The project establishes a transparent rule-based score before evaluating the Random Forest. The baseline prioritizes pages using three signals: staleness (whether the page has not been updated for at least 91 days), visibility (at least 500 impressions in the available 90-day window), and the CTR gap (the difference between the page's observed CTR and the median CTR for its position tier, with negative gaps clipped to zero). The score combines staleness, normalized impressions, and the positive CTR gap. Expected CTR values are calculated from training data, using pages with valid average-position data and at least 500 impressions. The same evaluation split and Precision@50 and ROC-AUC metrics are used for the baseline and the Random Forest.</p>
+        <p>On the client-grouped holdout test set, the baseline achieved a Precision@50 of 0.500 and a ROC-AUC of 0.504. Of the 50 highest-ranked pages, 25 were labeled as declining. These results serve as a reference for comparing the baseline's performance with the Random Forest model.</p>
+      </section>
+
+      <section id="model-analysis">
+        <h2>4. Model / analysis</h2>
+        <h3>Model choice</h3>
+        <p>A Random Forest classifier was selected to rank content pages by their likelihood of being labeled as declining. Its predicted probabilities generate a prioritized review queue rather than automatic refresh decisions.</p>
+
+        <h3>Target and features</h3>
+        <p>The target, <code>is_declining</code>, is 1 when <code>trend_direction</code> is <code>"down"</code> and 0 otherwise. Features cover search performance, traffic, engagement, content characteristics, freshness, search demand, and competition.</p>
+        <p>To reduce target leakage, <code>trend_direction</code>, <code>trend_pct</code>, <code>is_declining</code>, and the recent 30-day performance columns are excluded. <code>content_id</code> and <code>client_id</code> are also excluded from model features; <code>client_id</code> is used only for grouped evaluation.</p>
+
+        <h3>Model configuration</h3>
+        <ul>
+          <li><code>n_estimators=300</code></li>
+          <li><code>max_depth=20</code></li>
+          <li><code>min_samples_split=15</code></li>
+          <li><code>min_samples_leaf=8</code></li>
+          <li><code>class_weight="balanced"</code></li>
+          <li><code>random_state=42</code></li>
+          <li><code>n_jobs=-1</code></li>
+        </ul>
+        <p>Missing numerical values are imputed with 0, missing categorical values with <code>"missing"</code>, and categorical features are one-hot encoded using <code>handle_unknown="ignore"</code>.</p>
+      </section>
+
+      <section id="evaluation">
+        <h2>5. Evaluation</h2>
+        <p>The models were evaluated using <code>GroupShuffleSplit</code> (<code>test_size=0.25</code>, <code>random_state=42</code>), grouping by <code>client_id</code>. The holdout set contained 7,115 pages from 8 unseen clients. This tests generalization across clients, not future time periods.</p>
+        <p>Both models were evaluated on the same holdout set. The figure below compares the baseline and Random Forest results.</p>
+        <figure>
+          <img src="img/baseline_vs_random_forest.png" alt="Comparison of baseline and Random Forest evaluation results, including Precision at 50 and ROC-AUC" loading="lazy">
+          <figcaption>Baseline versus Random Forest on the client-grouped holdout test set.</figcaption>
+        </figure>
+        <p>The Random Forest outperformed the baseline on both metrics. Its top 50 included 34 declining-labeled pages, compared with 25 for the baseline. Its Precision@50 of 68.0% also exceeded the test set's overall decline-label rate of 51.7%. ROC-AUC increased from 0.504 to 0.600, indicating improved discrimination on this holdout set.</p>
+      </section>
+
+      <section id="interpretation">
+        <h2>6. Interpretation</h2>
+        <p>The Random Forest model's most important feature was <code>days_with_impressions</code> (0.0408), followed by <code>impressions_90d</code> (0.0115) and <code>avg_position</code> (0.0081). This suggests that search visibility and activity contributed more to the model's predictions than engagement metrics such as <code>scroll_rate</code>.</p>
+        <p>Feature importance does not establish causation, and the ROC-AUC of 0.600 indicates that the model's ability to distinguish between pages with and without the decline label remains modest.</p>
+      </section>
+
+      <section id="recommendation">
+        <h2>7. Recommendation</h2>
+        <p>The output should be used as a human-reviewed prioritization queue, not as an automatic content-refresh decision.</p>
+        <p>The reason codes and suggested actions help FlyRank editors investigate highly ranked pages:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Reason code</th><th>Interpretation</th><th>Suggested action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>stale_visible_low_ctr</code></td><td>Stale page with sufficient impressions and below-median CTR</td><td><code>review_content_and_search_performance</code></td></tr>
+              <tr><td><code>low_ctr_for_position</code></td><td>CTR below the reference for its position tier</td><td><code>review_search_performance</code></td></tr>
+              <tr><td><code>stale_visible_page</code></td><td>Stale page with sufficient visibility</td><td><code>review_content_freshness</code></td></tr>
+              <tr><td><code>low_visibility</code></td><td>Page with low search visibility</td><td><code>review_search_visibility</code></td></tr>
+              <tr><td><code>thin_visible_page</code></td><td>Visible page with relatively low word count</td><td><code>review_content_depth</code></td></tr>
+              <tr><td><code>no_strong_signal</code></td><td>No specific rule was triggered</td><td><code>monitor_page</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Reason-code distribution across the top 50 ranked pages:</strong></p>
+        <figure>
+          <img src="img/top50_action_code_distribution.png" alt="Distribution of reason codes across the 50 highest-ranked pages" loading="lazy">
+          <figcaption>Reason-code distribution among the top 50 pages in the ranked review queue.</figcaption>
+        </figure>
+        <p><strong>Action-code recommendations across the test set:</strong></p>
+        <figure>
+          <img src="img/action_code_distribution.png" alt="Distribution of recommended action codes across the test set" loading="lazy">
+          <figcaption>Distribution of suggested action codes across pages in the test set.</figcaption>
+        </figure>
+        <p>Editors can start with the highest-ranked pages, review their reason codes and search context, and decide whether to refresh, expand, protect, monitor, or take no action.</p>
+        <p><strong>Confidence and limitations:</strong> The Random Forest outperformed the baseline on the client-grouped holdout set. However, future-period testing and human review are needed to determine whether the ranking improves editorial decisions or search performance.</p>
+      </section>
+
+      <section id="reproducibility">
+        <h2>8. Reproducibility</h2>
+        <p>Clone the repository and run <code>work/notebooks/capstone.ipynb</code>. The notebook contains the complete project workflow, documenting each step from data preparation and methodology to model evaluation, results, limitations, and ranked recommendations.</p>
+      </section>
+
+      <section id="acknowledgments">
+        <h2>9. Acknowledgments &amp; data credit</h2>
+        <p>This project was completed as part of the FlyRank ML Internship and was built on the FlyRank ML Internship dataset.</p>
+        <p>Data source: <a href="https://flyrank.ai/" target="_blank" rel="noopener noreferrer">FlyRank</a></p>
+      </section>
+      <footer>
+        Capstone Report — Refresh / Content Opportunity
+      </footer>
+    </article>
+  </main>
+</body>
+</html>
